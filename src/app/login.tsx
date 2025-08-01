@@ -1,226 +1,224 @@
-import * as React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView, ActivityIndicator } from 'react-native';
-import { Link as ExpoLink, useRouter } from 'expo-router';
-import { useAuth } from '../context/AuthContext'; // Assumindo que seu hook está aqui
-import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import * as React from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ScrollView,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { Link as ExpoLink, useRouter } from "expo-router";
+import { useAuth } from "../context/AuthContext"; // Sua lógica de autenticação original
+import { Ionicons } from "@expo/vector-icons";
+
+// Paleta de cores inspirada em comida (Chocolate e Laranja)
+const Colors = {
+  background: "#4A2E2A", // Marrom Chocolate Escuro
+  primary: "#FF9800", // Laranja Vibrante
+  textPrimary: "#FFFFFF",
+  textSecondary: "rgba(255, 255, 255, 0.8)",
+  buttonTextPrimary: "#4A2E2A",
+  inputBackground: "rgba(0, 0, 0, 0.2)",
+  inputPlaceholder: "#BDBDBD",
+};
 
 export default function LoginScreen() {
-  // A hook useAuth() deve fornecer o tipo de `signIn`
-  const { signIn } = useAuth(); 
-  const [email, setEmail] = React.useState<string>('');
-  const [password, setPassword] = React.useState<string>('');
+  // --- SUA LÓGICA ORIGINAL (NÃO MODIFICADA) ---
+  const { signIn } = useAuth();
+  const [email, setEmail] = React.useState<string>("");
+  const [password, setPassword] = React.useState<string>("");
   const [loading, setLoading] = React.useState<boolean>(false);
   const router = useRouter();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Erro', 'Por favor, preencha todos os campos.');
+      Alert.alert("Erro", "Por favor, preencha todos os campos.");
       return;
     }
 
     try {
       setLoading(true);
       await signIn(email, password);
-      router.replace('/recipes'); 
+      router.replace("/recipes");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro desconhecido.';
-      Alert.alert('Erro de Login', errorMessage);
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Ocorreu um erro desconhecido.";
+      Alert.alert("Erro de Login", errorMessage);
     } finally {
       setLoading(false);
     }
   };
+  // --- FIM DA SUA LÓGICA ORIGINAL ---
 
   return (
-    <LinearGradient
-      colors={['#667eea', '#764ba2', '#f093fb']}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.header}>
-          <View style={styles.logoContainer}>
-            <LinearGradient
-              colors={['#ff9a9e', '#fecfef', '#fecfef']}
-              style={styles.logoGradient}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Ionicons name="restaurant" size={40} color="#fff" />
-            </LinearGradient>
-          </View>
+          <Ionicons
+            name="restaurant-outline"
+            size={60}
+            color={Colors.primary}
+          />
           <Text style={styles.title}>Bem-vindo de volta!</Text>
           <Text style={styles.subtitle}>Entre na sua conta para continuar</Text>
         </View>
 
         <View style={styles.form}>
           <View style={styles.inputContainer}>
-            <Ionicons name="mail-outline" size={20} color="#667eea" style={styles.inputIcon} />
+            <Ionicons
+              name="mail-outline"
+              size={22}
+              color={Colors.textSecondary}
+              style={styles.inputIcon}
+            />
             <TextInput
               style={styles.input}
               placeholder="E-mail"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
-              placeholderTextColor="#999"
+              placeholderTextColor={Colors.inputPlaceholder}
               autoCapitalize="none"
             />
           </View>
 
           <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color="#667eea" style={styles.inputIcon} />
+            <Ionicons
+              name="lock-closed-outline"
+              size={22}
+              color={Colors.textSecondary}
+              style={styles.inputIcon}
+            />
             <TextInput
               style={styles.input}
               placeholder="Senha"
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              placeholderTextColor="#999"
+              placeholderTextColor={Colors.inputPlaceholder}
             />
           </View>
 
           <TouchableOpacity
-            style={styles.button}
+            style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleLogin}
             disabled={loading}
+            activeOpacity={0.8}
           >
-            <LinearGradient
-              colors={loading ? ['#ccc', '#999'] : ['#667eea', '#764ba2']}
-              style={styles.buttonGradient}
-            >
-              {loading ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Ionicons name="log-in-outline" size={24} color="#fff" />
-              )}
-              <Text style={styles.buttonText}>{loading ? 'Entrando...' : 'Entrar'}</Text>
-            </LinearGradient>
+            {loading ? (
+              <ActivityIndicator
+                size="small"
+                color={Colors.buttonTextPrimary}
+              />
+            ) : (
+              <Text style={styles.buttonText}>Entrar</Text>
+            )}
           </TouchableOpacity>
+        </View>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Não tem conta? </Text>
-            <ExpoLink href="/register">
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>Não tem conta? </Text>
+          <ExpoLink href="/register" asChild>
+            <TouchableOpacity>
               <Text style={styles.linkText}>Cadastre-se</Text>
-            </ExpoLink>
-          </View>
+            </TouchableOpacity>
+          </ExpoLink>
         </View>
       </ScrollView>
-    </LinearGradient>
+    </KeyboardAvoidingView>
   );
 }
+
+// --- ESTILOS MODIFICADOS ---
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: Colors.background,
   },
   scrollContainer: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
-    paddingTop: 60,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: 40,
-  },
-  logoContainer: {
-    marginBottom: 20,
-  },
-  logoGradient: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
   },
   title: {
     fontSize: 32,
-    fontWeight: '900',
-    color: '#fff',
-    textAlign: 'center',
-    marginBottom: 8,
-    textShadowColor: 'rgba(0,0,0,0.3)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    fontWeight: "bold",
+    color: Colors.textPrimary,
+    textAlign: "center",
+    marginTop: 15,
   },
   subtitle: {
     fontSize: 16,
-    color: 'rgba(255,255,255,0.9)',
-    textAlign: 'center',
-    textShadowColor: 'rgba(0,0,0,0.2)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    color: Colors.textSecondary,
+    textAlign: "center",
+    marginTop: 8,
   },
   form: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 20,
-    padding: 24,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
+    width: "100%",
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f8fafc',
-    borderRadius: 12,
-    marginVertical: 8,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: '#e2e8f0',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.inputBackground,
+    borderRadius: 10,
+    marginVertical: 10,
+    paddingHorizontal: 15,
   },
   inputIcon: {
-    marginRight: 12,
+    marginRight: 10,
   },
   input: {
     flex: 1,
-    height: 50,
+    height: 55,
     fontSize: 16,
-    color: '#333',
-    paddingVertical: 0,
+    color: Colors.textPrimary,
   },
   button: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginTop: 20,
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowOffset: { width: 0, height: 3 },
-    shadowRadius: 6,
-  },
-  buttonGradient: {
+    backgroundColor: Colors.primary,
     paddingVertical: 16,
-    paddingHorizontal: 32,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 8,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 20,
+    height: 55,
+    justifyContent: "center",
+  },
+  buttonDisabled: {
+    backgroundColor: "#FFB74D",
   },
   buttonText: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#fff',
-    marginLeft: 8,
+    fontWeight: "bold",
+    color: Colors.buttonTextPrimary,
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 20,
+    flexDirection: "row",
+    justifyContent: "center",
+    marginTop: 30,
   },
   footerText: {
     fontSize: 16,
-    color: '#666',
+    color: Colors.textSecondary,
   },
   linkText: {
     fontSize: 16,
-    color: '#667eea',
-    fontWeight: '700',
+    color: Colors.primary,
+    fontWeight: "bold",
   },
 });
